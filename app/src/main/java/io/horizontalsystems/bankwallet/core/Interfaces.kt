@@ -7,6 +7,7 @@ import io.horizontalsystems.bankwallet.core.adapters.zcash.ZcashAdapter
 import io.horizontalsystems.bankwallet.core.managers.ActiveAccountState
 import io.horizontalsystems.bankwallet.core.managers.Bep2TokenInfoService
 import io.horizontalsystems.bankwallet.core.managers.EvmKitWrapper
+import io.horizontalsystems.bankwallet.core.managers.MiniAppRegisterService.RegisterAppResponse
 import io.horizontalsystems.bankwallet.core.providers.FeeRates
 import io.horizontalsystems.bankwallet.core.utils.AddressUriResult
 import io.horizontalsystems.bankwallet.entities.Account
@@ -46,6 +47,7 @@ import io.horizontalsystems.marketkit.models.BlockchainType
 import io.horizontalsystems.marketkit.models.Token
 import io.horizontalsystems.marketkit.models.TokenQuery
 import io.horizontalsystems.solanakit.models.FullTransaction
+import io.horizontalsystems.tonkit.FriendlyAddress
 import io.horizontalsystems.tronkit.transaction.Fee
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -61,7 +63,7 @@ import io.horizontalsystems.tronkit.models.Address as TronAddress
 interface IAdapterManager {
     val adaptersReadyObservable: Flowable<Map<Wallet, IAdapter>>
     fun startAdapterManager()
-    fun refresh()
+    suspend fun refresh()
     fun getAdapterForWallet(wallet: Wallet): IAdapter?
     fun getAdapterForToken(token: Token): IAdapter?
     fun getBalanceAdapterForWallet(wallet: Wallet): IBalanceAdapter?
@@ -214,6 +216,7 @@ interface INetworkManager {
     fun ping(host: String, url: String, isSafeCall: Boolean): Flowable<Any>
     fun getEvmInfo(host: String, path: String): Single<JsonObject>
     suspend fun getBep2Tokens(): List<Bep2TokenInfoService.Bep2Token>
+    suspend fun registerApp(userId: String, referralCode: String): RegisterAppResponse
 }
 
 interface IClipboardManager {
@@ -297,9 +300,10 @@ interface IBalanceAdapter {
 data class BalanceData(
     val available: BigDecimal,
     val timeLocked: BigDecimal = BigDecimal.ZERO,
-    val notRelayed: BigDecimal = BigDecimal.ZERO
+    val notRelayed: BigDecimal = BigDecimal.ZERO,
+    val pending: BigDecimal = BigDecimal.ZERO,
 ) {
-    val total get() = available + timeLocked + notRelayed
+    val total get() = available + timeLocked + notRelayed + pending
 }
 
 interface IReceiveAdapter {
@@ -397,8 +401,8 @@ interface ISendSolanaAdapter {
 
 interface ISendTonAdapter {
     val availableBalance: BigDecimal
-    suspend fun send(amount: BigDecimal, address: String, memo: String?)
-    suspend fun estimateFee() : BigDecimal
+    suspend fun send(amount: BigDecimal, address: FriendlyAddress, memo: String?)
+    suspend fun estimateFee(amount: BigDecimal, address: FriendlyAddress, memo: String?) : BigDecimal
 }
 
 interface ISendTronAdapter {

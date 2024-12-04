@@ -8,6 +8,7 @@ import com.walletconnect.web3.wallet.client.Wallet.Params.Pair
 import com.walletconnect.web3.wallet.client.Web3Wallet
 import io.horizontalsystems.bankwallet.R
 import io.horizontalsystems.bankwallet.core.AdapterState
+import io.horizontalsystems.bankwallet.core.App
 import io.horizontalsystems.bankwallet.core.ILocalStorage
 import io.horizontalsystems.bankwallet.core.ViewModelUiState
 import io.horizontalsystems.bankwallet.core.factories.uriScheme
@@ -45,7 +46,8 @@ class BalanceViewModel(
     private val localStorage: ILocalStorage,
     private val wCManager: WCManager,
     private val addressHandlerFactory: AddressHandlerFactory,
-    private val priceManager: PriceManager
+    private val priceManager: PriceManager,
+    val isSwapEnabled: Boolean
 ) : ViewModelUiState<BalanceUiState>(), ITotalBalance by totalBalance {
 
     private var balanceViewType = balanceViewTypeManager.balanceViewTypeFlow.value
@@ -181,7 +183,7 @@ class BalanceViewModel(
 
         stat(page = StatPage.Balance, event = StatEvent.Refresh)
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             isRefreshing = true
             emitState()
 
@@ -240,11 +242,17 @@ class BalanceViewModel(
     }
 
     fun handleScannedData(scannedText: String) {
-        val wcUriVersion = WalletConnectListModule.getVersionFromUri(scannedText)
-        if (wcUriVersion == 2) {
-            handleWalletConnectUri(scannedText)
-        } else {
-            handleAddressData(scannedText)
+        viewModelScope.launch {
+            if (scannedText.startsWith("tc:")) {
+                App.tonConnectManager.handle(scannedText)
+            } else {
+                val wcUriVersion = WalletConnectListModule.getVersionFromUri(scannedText)
+                if (wcUriVersion == 2) {
+                    handleWalletConnectUri(scannedText)
+                } else {
+                    handleAddressData(scannedText)
+                }
+            }
         }
     }
 

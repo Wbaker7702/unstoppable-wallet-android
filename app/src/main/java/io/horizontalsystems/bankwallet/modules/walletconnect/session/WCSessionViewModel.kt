@@ -40,7 +40,8 @@ class WCSessionViewModel(
 ) : ViewModelUiState<WCSessionUiState>() {
 
     val closeLiveEvent = SingleLiveEvent<Unit>()
-    val showErrorLiveEvent = SingleLiveEvent<Unit>()
+    val showErrorLiveEvent = SingleLiveEvent<String?>()
+    val showNoInternetErrorLiveEvent = SingleLiveEvent<Unit>()
 
     private var peerMeta: PeerMetaItem? = null
     private var closeEnabled = false
@@ -69,7 +70,7 @@ class WCSessionViewModel(
         "wallet_switchEthereumChain"
     )
 
-    private val supportedEvents = listOf("chainChanged", "accountsChanged" /*"connect", "disconnect", "message"*/)
+    private val supportedEvents = listOf("chainChanged", "accountsChanged", "connect", "disconnect", "message")
 
     override fun createState() = WCSessionUiState(
         peerMeta = peerMeta,
@@ -280,7 +281,7 @@ class WCSessionViewModel(
         val proposal = proposal ?: return
 
         if (!connectivityManager.isConnected) {
-            showErrorLiveEvent.postValue(Unit)
+            showNoInternetErrorLiveEvent.postValue(Unit)
             return
         }
 
@@ -295,7 +296,7 @@ class WCSessionViewModel(
         val proposal = proposal ?: return
 
         if (!connectivityManager.isConnected) {
-            showErrorLiveEvent.postValue(Unit)
+            showNoInternetErrorLiveEvent.postValue(Unit)
             return
         }
 
@@ -305,13 +306,18 @@ class WCSessionViewModel(
         }
 
         viewModelScope.launch {
-            approve(proposal.proposerPublicKey)
+            try {
+                approve(proposal.proposerPublicKey)
+            } catch (t: Throwable) {
+                WCDelegate.sessionProposalEvent = null
+                showErrorLiveEvent.postValue(t.message)
+            }
         }
     }
 
     fun disconnect() {
         if (!connectivityManager.isConnected) {
-            showErrorLiveEvent.postValue(Unit)
+            showNoInternetErrorLiveEvent.postValue(Unit)
             return
         }
 
@@ -331,9 +337,15 @@ class WCSessionViewModel(
             if (Web3Wallet.getSessionProposals().isNotEmpty()) {
                 val blockchains = getSupportedBlockchains(accountNonNull)
                 val namespaces = getSupportedNamespaces(blockchains.map { it.getAccount() })
-                val sessionProposal: Wallet.Model.SessionProposal = requireNotNull(
-                    Web3Wallet.getSessionProposals()
-                        .find { it.proposerPublicKey == proposalPublicKey })
+                val sessionProposal: Wallet.Model.SessionProposal = try {
+                    requireNotNull(
+                        Web3Wallet.getSessionProposals()
+                            .find { it.proposerPublicKey == proposalPublicKey })
+                } catch (e: Exception) {
+                    continuation.resumeWithException(e)
+                    WCDelegate.sessionProposalEvent = null
+                    return@suspendCoroutine
+                }
                 val sessionNamespaces = Web3Wallet.generateApprovedNamespaces(
                     sessionProposal = sessionProposal,
                     supportedNamespaces = namespaces

@@ -1,11 +1,13 @@
 package io.horizontalsystems.bankwallet.modules.main
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.fragment.NavHostFragment
 import com.walletconnect.web3.wallet.client.Wallet
 import io.horizontalsystems.bankwallet.R
+import io.horizontalsystems.bankwallet.core.App
 import io.horizontalsystems.bankwallet.core.BaseActivity
 import io.horizontalsystems.bankwallet.core.slideFromBottom
 import io.horizontalsystems.bankwallet.modules.intro.IntroActivity
@@ -61,6 +63,19 @@ class MainActivity : BaseActivity() {
                 viewModel.onWcEventHandled()
             }
         }
+
+        viewModel.tcSendRequest.observe(this) { request ->
+            if (request != null) {
+                navController.slideFromBottom(R.id.tcSendRequestFragment)
+            }
+        }
+
+        viewModel.tcDappRequest.observe(this) { request ->
+            if (request != null) {
+                navController.slideFromBottom(R.id.tcNewFragment, request)
+                viewModel.onTcDappRequestHandled()
+            }
+        }
     }
 
     private fun validate() = try {
@@ -79,5 +94,8 @@ class MainActivity : BaseActivity() {
         finish()
     } catch (e: MainScreenValidationError.Unlock) {
         LockScreenActivity.start(this)
+    } catch (e: MainScreenValidationError.KeystoreRuntimeException) {
+        Toast.makeText(App.instance, "Issue with Keystore", Toast.LENGTH_SHORT).show()
+        finish()
     }
 }

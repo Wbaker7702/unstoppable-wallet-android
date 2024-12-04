@@ -107,6 +107,21 @@ private fun SettingSections(
     VSpacer(32.dp)
 
     CellUniversalLawrenceSection(
+        listOf {
+            HsSettingCell(
+                R.string.Settings_GetYourTokens,
+                R.drawable.ic_uwt2_24,
+                ComposeAppTheme.colors.jacob,
+                onClick = {
+                    LinkHelper.openLinkInAppBrowser(context, "https://t.me/BeUnstoppable_bot")
+                }
+            )
+        }
+    )
+
+    VSpacer(32.dp)
+
+    CellUniversalLawrenceSection(
         listOf({
             HsSettingCell(
                 R.string.SettingsSecurity_ManageKeys,
@@ -177,6 +192,21 @@ private fun SettingSections(
                     }
                 }
             )
+//        }, {
+//            HsSettingCell(
+//                title = R.string.Settings_TonConnect,
+//                icon = R.drawable.ic_ton_connect_24,
+//                value = null,
+//                counterBadge = null,
+//                onClick = {
+//                    navController.slideFromRight(R.id.tcListFragment)
+//
+//                    stat(
+//                        page = StatPage.Settings,
+//                        event = StatEvent.Open(StatPage.TonConnect)
+//                    )
+//                }
+//            )
         }, {
             HsSettingCell(
                 R.string.BackupManager_Title,

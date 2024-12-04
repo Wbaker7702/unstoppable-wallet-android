@@ -26,7 +26,6 @@ import io.horizontalsystems.bankwallet.core.managers.AccountCleaner
 import io.horizontalsystems.bankwallet.core.managers.AccountManager
 import io.horizontalsystems.bankwallet.core.managers.AdapterManager
 import io.horizontalsystems.bankwallet.core.managers.AppVersionManager
-import io.horizontalsystems.bankwallet.core.managers.BackgroundStateChangeListener
 import io.horizontalsystems.bankwallet.core.managers.BackupManager
 import io.horizontalsystems.bankwallet.core.managers.BalanceHiddenManager
 import io.horizontalsystems.bankwallet.core.managers.BaseTokenManager
@@ -61,6 +60,9 @@ import io.horizontalsystems.bankwallet.core.managers.SubscriptionManager
 import io.horizontalsystems.bankwallet.core.managers.SystemInfoManager
 import io.horizontalsystems.bankwallet.core.managers.TermsManager
 import io.horizontalsystems.bankwallet.core.managers.TokenAutoEnableManager
+import io.horizontalsystems.bankwallet.core.managers.TonAccountManager
+import io.horizontalsystems.bankwallet.core.managers.TonConnectManager
+import io.horizontalsystems.bankwallet.core.managers.TonKitManager
 import io.horizontalsystems.bankwallet.core.managers.TorManager
 import io.horizontalsystems.bankwallet.core.managers.TransactionAdapterManager
 import io.horizontalsystems.bankwallet.core.managers.TronAccountManager
@@ -141,7 +143,6 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         lateinit var btcBlockchainManager: BtcBlockchainManager
         lateinit var wordsManager: WordsManager
         lateinit var networkManager: INetworkManager
-        lateinit var backgroundStateChangeListener: BackgroundStateChangeListener
         lateinit var appConfigProvider: AppConfigProvider
         lateinit var adapterManager: IAdapterManager
         lateinit var transactionAdapterManager: TransactionAdapterManager
@@ -163,6 +164,7 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         lateinit var binanceKitManager: BinanceKitManager
         lateinit var solanaKitManager: SolanaKitManager
         lateinit var tronKitManager: TronKitManager
+        lateinit var tonKitManager: TonKitManager
         lateinit var numberFormatter: IAppNumberFormatter
         lateinit var feeCoinProvider: FeeTokenProvider
         lateinit var accountCleaner: IAccountCleaner
@@ -197,6 +199,7 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         lateinit var backupProvider: BackupProvider
         lateinit var spamManager: SpamManager
         lateinit var statsManager: StatsManager
+        lateinit var tonConnectManager: TonConnectManager
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
@@ -275,6 +278,7 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         solanaKitManager = SolanaKitManager(appConfigProvider, solanaRpcSourceManager, solanaWalletManager, backgroundManager)
 
         tronKitManager = TronKitManager(appConfigProvider, backgroundManager)
+        tonKitManager = TonKitManager(backgroundManager)
 
         wordsManager = WordsManager(Mnemonic())
         networkManager = NetworkManager()
@@ -318,6 +322,9 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         )
         tronAccountManager.start()
 
+        val tonAccountManager = TonAccountManager(accountManager, walletManager, tonKitManager, tokenAutoEnableManager)
+        tonAccountManager.start()
+
         systemInfoManager = SystemInfoManager(appConfigProvider)
 
         languageManager = LanguageManager()
@@ -344,13 +351,23 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
             binanceKitManager = binanceKitManager,
             solanaKitManager = solanaKitManager,
             tronKitManager = tronKitManager,
+            tonKitManager = tonKitManager,
             backgroundManager = backgroundManager,
             restoreSettingsManager = restoreSettingsManager,
             coinManager = coinManager,
             evmLabelManager = evmLabelManager,
             localStorage = localStorage
         )
-        adapterManager = AdapterManager(walletManager, adapterFactory, btcBlockchainManager, evmBlockchainManager, binanceKitManager, solanaKitManager, tronKitManager)
+        adapterManager = AdapterManager(
+            walletManager,
+            adapterFactory,
+            btcBlockchainManager,
+            evmBlockchainManager,
+            binanceKitManager,
+            solanaKitManager,
+            tronKitManager,
+            tonKitManager,
+        )
         transactionAdapterManager = TransactionAdapterManager(adapterManager, adapterFactory)
 
         feeCoinProvider = FeeTokenProvider(marketKit)
@@ -358,13 +375,11 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         pinComponent = PinComponent(
             pinSettingsStorage = pinSettingsStorage,
             userManager = userManager,
-            pinDbStorage = PinDbStorage(appDatabase.pinDao())
+            pinDbStorage = PinDbStorage(appDatabase.pinDao()),
+            backgroundManager = backgroundManager
         )
 
-        statsManager = StatsManager(appDatabase.statsDao(), localStorage, marketKit, appConfigProvider)
-        backgroundStateChangeListener = BackgroundStateChangeListener(pinComponent, statsManager).apply {
-            backgroundManager.registerListener(this)
-        }
+        statsManager = StatsManager(appDatabase.statsDao(), localStorage, marketKit, appConfigProvider, backgroundManager)
 
         rateAppManager = RateAppManager(walletManager, adapterManager, localStorage)
 
@@ -437,6 +452,9 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         )
 
         spamManager = SpamManager(localStorage)
+
+        tonConnectManager = TonConnectManager(this, adapterFactory)
+        tonConnectManager.start()
 
         startTasks()
     }
@@ -516,6 +534,8 @@ class App : CoreApp(), WorkConfiguration.Provider, ImageLoaderFactory {
         super.onConfigurationChanged(newConfig)
         localeAwareContext(this)
     }
+
+    override val isSwapEnabled = true
 
     override fun getApplicationSignatures() = try {
         val signatureList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
