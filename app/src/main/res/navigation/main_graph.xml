@@ -217,6 +217,9 @@
         android:id="@+id/marketSearchFragment"
         android:name="io.horizontalsystems.bankwallet.modules.market.search.MarketSearchFragment"/>
     <fragment
+        android:id="@+id/explorer3Fragment"
+        android:name="io.horizontalsystems.bankwallet.modules.explorer3.Explorer3Fragment"/>
+    <fragment
         android:id="@+id/marketPlatformFragment"
         android:name="io.horizontalsystems.bankwallet.modules.market.platform.MarketPlatformFragment"/>
     <fragment

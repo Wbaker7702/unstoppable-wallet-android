@@ -196,6 +196,17 @@
     <string name="Market_Search">Search</string>
     <string name="Market_Search_Sections_RecentTitle">RECENT</string>
     <string name="Market_Search_Sections_PopularTitle">POPULAR</string>
+
+    <!--Explorer3-->
+    <string name="Explorer3_Title">Explorer</string>
+    <string name="Explorer3_SearchHint">Search transactions, addresses, blocks...</string>
+    <string name="Explorer3_NoResults">No results found</string>
+    <string name="Explorer3_RecentSearches">Recent Searches</string>
+    <string name="Explorer3_Transactions">Transactions</string>
+    <string name="Explorer3_Addresses">Addresses</string>
+    <string name="Explorer3_Blocks">Blocks</string>
+    <string name="Explorer3_Tokens">Tokens</string>
+    <string name="Explorer3_Contracts">Contracts</string>
     <string name="Market_FilterSection_MarketParameters">MARKET PARAMETERS</string>
     <string name="Market_FilterSection_PriceParameters">PRICE PARAMETERS</string>
     <string name="Market_FilterSection_NetworkParameters">NETWORK PARAMETERS</string>
