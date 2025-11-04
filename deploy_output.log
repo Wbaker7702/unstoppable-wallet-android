@@ -1,0 +1,68 @@
+🚀 Explorer3 Deployment Script
+================================
+
+📋 Checking prerequisites...
+[0;32m✅ Java found: openjdk version "21.0.8" 2025-07-15[0m
+[0;32m✅ ANDROID_HOME: /root/Android/Sdk[0m
+[0;32m✅ Gradle wrapper found[0m
+
+🧹 Cleaning previous builds...
+
+> Configure project :app
+WARNING: The option setting 'android.defaults.buildfeatures.buildconfig=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+You can resolve this warning in Android Studio via `Refactor` > `Migrate BuildConfig to Gradle Build Files`
+
+> Task :clean UP-TO-DATE
+> Task :app:clean UP-TO-DATE
+> Task :core:clean UP-TO-DATE
+> Task :components:chartview:clean UP-TO-DATE
+> Task :components:icons:clean UP-TO-DATE
+
+BUILD SUCCESSFUL in 3s
+5 actionable tasks: 5 up-to-date
+
+🔍 Running lint checks...
+
+> Configure project :app
+WARNING: The option setting 'android.defaults.buildfeatures.buildconfig=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+You can resolve this warning in Android Studio via `Refactor` > `Migrate BuildConfig to Gradle Build Files`
+
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core:mergeDebugJniLibFolders
+> Task :core:mergeDebugNativeLibs NO-SOURCE
+> Task :core:stripDebugDebugSymbols NO-SOURCE
+> Task :core:checkKotlinGradlePluginConfigurationErrors
+> Task :core:copyDebugJniLibsProjectAndLocalJars
+> Task :core:generateDebugBuildConfig
+> Task :core:generateDebugResValues
+> Task :core:generateDebugResources
+> Task :core:packageDebugResources
+> Task :core:extractDeepLinksForAarDebug
+> Task :core:javaPreCompileDebug
+> Task :core:mergeDebugShaders
+> Task :core:compileDebugShaders NO-SOURCE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:packageDebugAssets
+> Task :core:prepareDebugArtProfile
+> Task :core:prepareLintJarForPublish
+> Task :core:parseDebugLocalResources
+> Task :core:processDebugManifest
+> Task :core:generateDebugRFile
+> Task :core:writeDebugAarMetadata
+> Task :components:icons:preBuild UP-TO-DATE
+> Task :components:icons:preDebugBuild UP-TO-DATE
+> Task :components:icons:mergeDebugJniLibFolders
+> Task :components:icons:mergeDebugNativeLibs NO-SOURCE
+> Task :components:icons:stripDebugDebugSymbols NO-SOURCE
+> Task :components:icons:copyDebugJniLibsProjectAndLocalJars
+> Task :components:icons:checkKotlinGradlePluginConfigurationErrors
+> Task :components:icons:generateDebugBuildConfig
+> Task :components:icons:generateDebugResValues
+> Task :components:icons:generateDebugResources
+> Task :components:icons:packageDebugResources
+> Task :components:icons:parseDebugLocalResources
