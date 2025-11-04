@@ -200,6 +200,8 @@ class TransactionsViewModel(
     }
 
     fun getTransactionItem(viewItem: TransactionViewItem) = service.getTransactionItem(viewItem.uid)
+    
+    fun getTransactionItem(recordUid: String) = service.getTransactionItem(recordUid)
 
     fun updateFilterHideSuspiciousTx(checked: Boolean) {
         transactionFilterService.updateFilterHideSuspiciousTx(checked)

@@ -96,7 +96,7 @@ fun AddressResultItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_qr_code),
+                painter = painterResource(R.drawable.ic_qr_scan_24px),
                 contentDescription = null,
                 tint = ComposeAppTheme.colors.jacob,
                 modifier = Modifier.size(24.dp)
