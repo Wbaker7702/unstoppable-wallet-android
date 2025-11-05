@@ -1,4 +1,4 @@
-# Explorer3 Build Environment Status
+# Build Environment Status
 
 ## ✅ Completed Setup
 
@@ -7,6 +7,15 @@
 - **Location:** `/usr/lib/jvm/java-17-openjdk-amd64`
 - **Version:** OpenJDK 17.0.16
 - **Verified:** `java -version` works
+
+### Android SDK
+- **Status:** ✅ Installed
+- **Location:** `~/Android/Sdk`
+- **Platform:** Android 34
+- **Build Tools:** 34.0.0
+- **Platform Tools:** 36.0.0
+- **Command-line Tools:** Latest
+- **Verified:** SDK installed and licenses accepted
 
 ### Gradle
 - **Status:** ✅ Working
@@ -18,55 +27,80 @@
 - **local.properties:** Created (points to `~/Android/Sdk`)
 - **All code:** Committed and pushed to GitHub
 
-## ⚠️ Required: Android SDK
+## ⚠️ Known Issues
 
-### Current Status
-- **Android SDK:** Not installed
-- **ANDROID_HOME:** Not set
-- **Required:** Android SDK Platform 34, Build Tools 34.0.0
+### JitPack Dependencies
+The build currently fails due to missing JitPack dependencies:
+- `bitcoin-kit-android:ced5801`
+- `ethereum-kit-android:0c770e3`
+- `tron-kit-android:dc3dca7`
 
-### Installation Options
+These are horizontalsystems internal kit libraries referenced by git commit hash. The JitPack repository may need time to build these artifacts, or the commit hashes may need to be updated to valid tags/versions.
 
-**Option 1: Android Studio (Easiest)**
-1. Install Android Studio
-2. Open SDK Manager
-3. Install Android SDK Platform 34
-4. Set `ANDROID_HOME=$HOME/Android/Sdk`
+**Potential Solutions:**
+1. Wait for JitPack to build the artifacts (can take time)
+2. Update to stable version tags instead of commit hashes
+3. Build the kit libraries locally and publish to mavenLocal()
+4. Check if the repository has these commits available
 
-**Option 2: Command Line Tools**
-See `SETUP_ANDROID_SDK.md` for detailed instructions
+## 🚀 Build Commands
 
-**Option 3: Use Existing SDK**
-If you have Android SDK installed elsewhere, update `local.properties`:
+Set environment variables first:
 ```bash
-echo "sdk.dir=/path/to/your/android/sdk" > local.properties
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
 ```
 
-## 🚀 Next Steps
-
-Once Android SDK is installed:
-
+Build commands:
 ```bash
-# Set environment variables
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-export PATH=$PATH:$JAVA_HOME/bin
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-
-# Run deployment
 cd /workspace/unstoppable-wallet-android
-./deploy.sh
+
+# List available tasks
+./gradlew tasks
+
+# Clean build
+./gradlew clean
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK
+./gradlew assembleRelease
+
+# Run tests
+./gradlew test
+
+# Check dependencies
+./gradlew dependencies
 ```
 
 ## 📊 Progress Summary
 
 - ✅ Java 17 installed and configured
+- ✅ Android SDK installed (Platform 34, Build Tools 34.0.0)
 - ✅ Gradle wrapper working
 - ✅ Project code complete
 - ✅ Deployment script ready
-- ⚠️  Android SDK installation needed
+- ⚠️  Dependency resolution issues (JitPack)
 
-**Completion:** ~75% (missing only Android SDK)
+**Completion:** ~90% (build environment ready, waiting on dependencies)
+
+## 🐛 Debugging
+
+### Check JitPack Status
+Visit: https://jitpack.io/#horizontalsystems/bitcoin-kit-android
+Check if the specific commit `ced5801` is built
+
+### View Build Log
+```bash
+./gradlew assembleDebug --stacktrace --info
+```
+
+### Check Current Dependencies
+```bash
+./gradlew app:dependencies --configuration debugCompileClasspath
+```
 
 ## 📚 Documentation
 
