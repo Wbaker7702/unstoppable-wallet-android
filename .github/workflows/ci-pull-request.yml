@@ -7,6 +7,8 @@ jobs:
   notify:
     if: ${{ !startsWith(github.head_ref, 'l10n_version/') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
